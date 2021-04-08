@@ -8,6 +8,7 @@
 #include <syslog.h>
 #include <string.h>
 #include "daemon.h"
+#include "directory.h"
 
 void daemonInit()
 {
@@ -44,4 +45,9 @@ void daemonInit()
 void daemonExit()
 {
     closelog();
+}
+
+void daemonService(struct ProgramData data)
+{
+    checkForDeletion(data);
 }
