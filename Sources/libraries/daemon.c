@@ -49,5 +49,6 @@ void daemonExit()
 
 void daemonService(struct ProgramData data)
 {
-    checkForDeletion(data);
+    //checkForDeletion(data);
+    checkForModificationTime(data);
 }
