@@ -9,6 +9,7 @@
 #include <string.h>
 #include "daemon.h"
 #include "directory.h"
+#include <signal.h>
 
 void daemonInit()
 {
@@ -39,6 +40,13 @@ void daemonInit()
         close(STDIN_FILENO);
         close(STDOUT_FILENO);
         close(STDERR_FILENO);
+
+        if (signal(SIGUSR1, wakeUp) == SIG_ERR)
+		{
+			syslog(LOG_ERR, "Error has occured while trying to init signal.");
+		
+			exit(EXIT_FAILURE);
+		}
 }
 
 
@@ -49,6 +57,11 @@ void daemonExit()
 
 void daemonService(struct ProgramData data)
 {
-    //checkForDeletion(data);
+    checkForDeletion(data);
     checkForModificationTime(data);
+}
+
+void wakeUp()
+{
+    wakey_reason = SIGNAL;
 }

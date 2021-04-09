@@ -1,21 +1,32 @@
 #include "../libraries/daemon.h"
 #include "../libraries/definitions.h"
 #include "../libraries/parser.h"
+#include <syslog.h>
 
 int main(int argc, char *argv[])
 {
-    // daemonInit();
-
     struct ProgramData data = parseCommandLine(argc, argv);
-    daemonService(data);
-    //printf("%s\n%s\n%d\n", data.source_path, data.destination_path, data.sleeping_time);
 
-    // while (1)
-    // {
-          
-    // }
+    daemonInit();
+
+    while (1)
+    {
+        switch(wakey_reason)
+        {
+            case SLEEP:
+                syslog(LOG_INFO, "Daemon has been woked up by sleeping timer.");
+                break;
+            case SIGNAL:
+                syslog(LOG_INFO, "Daemon has been woked up by signal.");
+                break;
+        }
+        daemonService(data);
+        wakey_reason = SLEEP;
+        syslog(LOG_INFO, "Daemon says zzz....");
+        sleep(data.sleeping_time);   
+    }
  
-    //daemonExit();
+    daemonExit();
 
     return 0;
 }

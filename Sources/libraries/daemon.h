@@ -8,3 +8,5 @@ void daemonInit();
 void daemonExit();
 // Funkcja odpowiedzialna za czynnosci wykonywane przez demona
 void daemonService(struct ProgramData data);
+// Funkcja obsluguja obudzenie demona poprzez sygnal
+void wakeUp();

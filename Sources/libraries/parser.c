@@ -22,7 +22,7 @@ struct ProgramData parseCommandLine(int argc, char *argv[])
         fprintf(stderr, "Usage: %s [-s source path] [-d destination path] [optional: -t seconds (sleep time)]\n", argv[0]);
         exit(EXIT_FAILURE);
     }
-    while ((opt = getopt(argc, argv, "s:d:t::")) != -1)
+    while ((opt = getopt(argc, argv, "s:d:t:")) != -1)
     {
         switch (opt)
         {
@@ -63,7 +63,6 @@ struct ProgramData parseCommandLine(int argc, char *argv[])
                     if(*(optarg + strlen(optarg) - 1) == '/')
                         optarg[strlen(optarg) - 1] = 0;
                     data.destination_path = optarg;
-                    printf("%s", data.destination_path);
                 }
             }
             else

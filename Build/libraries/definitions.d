@@ -1,3 +1,3 @@
-/home/gabriel/Desktop/so_project/Build/libraries/definitions.o: \
- /home/gabriel/Desktop/so_project/Sources/libraries/definitions.c \
- /home/gabriel/Desktop/so_project/Sources/libraries/definitions.h
+/home/gabriel/Desktop/daemon/Build/libraries/definitions.o: \
+ /home/gabriel/Desktop/daemon/Sources/libraries/definitions.c \
+ /home/gabriel/Desktop/daemon/Sources/libraries/definitions.h
