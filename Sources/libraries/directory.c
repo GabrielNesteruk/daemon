@@ -70,7 +70,7 @@ void copyFiles(const char* path1, const char* path2)
 {
     int source_fd;
     int dest_fd;
-    char buffer[256] = {' '};
+    char buffer[256] = {0};
 
     struct stat source_file;
 
@@ -100,8 +100,9 @@ void copyFiles(const char* path1, const char* path2)
 
     if(source_fd > 0) // jest cokolwiek do odczytania z source
     {
-        read(source_fd, buffer, sizeof(buffer));
-        write(dest_fd, buffer, sizeof(buffer));
+        ssize_t num_read;
+        while(num_read = read(source_fd, buffer, sizeof(buffer)))
+            write(dest_fd, buffer, num_read);
     }
 
     close(source_fd);

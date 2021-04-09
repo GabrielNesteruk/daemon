@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <syslog.h>
+#include "string.h"
 
 struct ProgramData parseCommandLine(int argc, char *argv[])
 {
@@ -35,7 +36,11 @@ struct ProgramData parseCommandLine(int argc, char *argv[])
                     exit(EXIT_FAILURE);
                 }
                 else
+                {
+                    if(*(optarg + strlen(optarg) - 1) == '/')
+                        optarg[strlen(optarg) - 1] = 0;
                     data.source_path = optarg;
+                }
             }
             else
             {
@@ -54,7 +59,12 @@ struct ProgramData parseCommandLine(int argc, char *argv[])
                     exit(EXIT_FAILURE);
                 }
                 else
+                {
+                    if(*(optarg + strlen(optarg) - 1) == '/')
+                        optarg[strlen(optarg) - 1] = 0;
                     data.destination_path = optarg;
+                    printf("%s", data.destination_path);
+                }
             }
             else
             {
