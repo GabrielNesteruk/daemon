@@ -28,7 +28,6 @@ void checkForDeletion(const struct ProgramData data)
         }
         else if(entity->d_type == DT_DIR)
         {
-            // folder istnieje w source i dest
             if (!(!strcmp(entity->d_name, ".") || !strcmp(entity->d_name, "..")))
             {
                 // kopiujemy sciezki do struktury i rekurencyjne przeszukujemy katalogi
@@ -64,25 +63,42 @@ void checkForModificationTime(const struct ProgramData data)
     while(entity != NULL)   // iterujemy dopoki sa elementy do odczytu
     {
         char* destination_file_path = concatPaths(data.destination_path, entity->d_name);
+        char* source_file_path = concatPaths(data.source_path, entity->d_name);
+        if(entity->d_type == DT_DIR)
+        {
+            if (!(!strcmp(entity->d_name, ".") || !strcmp(entity->d_name, "..")))
+            {
+                // kopiujemy sciezki do struktury i rekurencyjne przeszukujemy katalogi
+                struct ProgramData recursive_data;
+                recursive_data.source_path = strdup(source_file_path);
+                recursive_data.destination_path = strdup(destination_file_path);
+                recursive_data.sleeping_time = data.sleeping_time;
+                if(access(destination_file_path, F_OK) != 0) // folder nie istnieje w dest ale istnieje w source
+                {
+                    mkdir(destination_file_path, 0777);
+                    syslog(LOG_INFO, "Directory %s has been created.", destination_file_path);
+                }
+                checkForModificationTime(recursive_data);
+                free(recursive_data.source_path);
+                free(recursive_data.destination_path);
+            }
+        }
         if(access(destination_file_path, F_OK) == 0 && entity->d_type == DT_REG)
         {
             // znaleziono taki sam plik w katalogu docelowym, teraz nalezy porownac date ich modyfikacji
-            char* source_file_path = concatPaths(data.source_path, entity->d_name);
             if(compareModificationTime(source_file_path, destination_file_path))
             {
                 // czas modyfikacji w dest jest pozniejszy niz w source, wiec kopiujemy source -> dest
                 copyFiles(source_file_path, destination_file_path);   
             }
-            free(source_file_path);
         }
         if(access(destination_file_path, F_OK) != 0 && entity->d_type == DT_REG)
         {
             // plik jest w source ale nie ma go w dest wiec trzeba go tam skopiowac
-            char* source_file_path = concatPaths(data.source_path, entity->d_name);
-            copyFiles(source_file_path, destination_file_path);
-            free(source_file_path);    
+            copyFiles(source_file_path, destination_file_path);  
         }
         entity = readdir(dir);
+        free(source_file_path);  
         free(destination_file_path);
     }
     closedir(dir);
@@ -155,4 +171,9 @@ bool compareModificationTime(const char* path1, const char* path2)
     }
     else
         return false;
+}
+
+struct ProgramData* fillRecursiveData()
+{
+
 }
