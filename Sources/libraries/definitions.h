@@ -1,10 +1,13 @@
 #pragma once
 
+#include <stdbool.h>
+
 struct ProgramData
 {
     const char* source_path;
     const char* destination_path;
     int sleeping_time;
+    bool recursive_scan;
 };
 
 enum WakeyReason

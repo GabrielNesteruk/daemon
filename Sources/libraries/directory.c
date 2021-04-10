@@ -26,7 +26,7 @@ void checkForDeletion(const struct ProgramData data)
             remove(destination_file_path);
             syslog(LOG_INFO, "File %s has been removed.", destination_file_path);
         }
-        else if(entity->d_type == DT_DIR)
+        else if(entity->d_type == DT_DIR && data.recursive_scan)
         {
             if (!(!strcmp(entity->d_name, ".") || !strcmp(entity->d_name, "..")))
             {
@@ -64,7 +64,7 @@ void checkForModificationTime(const struct ProgramData data)
     {
         char* destination_file_path = concatPaths(data.destination_path, entity->d_name);
         char* source_file_path = concatPaths(data.source_path, entity->d_name);
-        if(entity->d_type == DT_DIR)
+        if(entity->d_type == DT_DIR && data.recursive_scan)
         {
             if (!(!strcmp(entity->d_name, ".") || !strcmp(entity->d_name, "..")))
             {
@@ -171,9 +171,4 @@ bool compareModificationTime(const char* path1, const char* path2)
     }
     else
         return false;
-}
-
-struct ProgramData* fillRecursiveData()
-{
-
 }

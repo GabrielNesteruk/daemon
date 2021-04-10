@@ -6,7 +6,6 @@
 int main(int argc, char *argv[])
 {
     struct ProgramData data = parseCommandLine(argc, argv);
-    syslog(LOG_INFO, "%d", data.sleeping_time);
     daemonInit();
 
     while (1)

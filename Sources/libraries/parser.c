@@ -15,14 +15,15 @@ struct ProgramData parseCommandLine(int argc, char *argv[])
     struct stat st;
     struct ProgramData data;
     data.sleeping_time = sleep_time_initializer;
-
+    data.recursive_scan = false;
+    
     if(argc < 4)
     {
         fprintf(stderr, "Too few arguments!\n");
-        fprintf(stderr, "Usage: %s [-s source path] [-d destination path] [optional: -t seconds (sleep time)]\n", argv[0]);
+        fprintf(stderr, "Usage: %s [-s source path] [-d destination path] [optional: -t seconds (sleep time)] [optional: -R (recursive scan)]\n", argv[0]);
         exit(EXIT_FAILURE);
     }
-    while ((opt = getopt(argc, argv, "s:d:t:")) != -1)
+    while ((opt = getopt(argc, argv, "s:d:t:R")) != -1)
     {
         switch (opt)
         {
@@ -79,6 +80,9 @@ struct ProgramData parseCommandLine(int argc, char *argv[])
                 data.sleeping_time = tmp_seconds;
             break;
         }
+        case 'R':
+            data.recursive_scan = true;
+            break;
         case '?':
             fprintf(stderr, "Usage: %s [-s source path] [-d destination path] [optional: -t seconds (sleep time)]\n",
                     argv[0]);
