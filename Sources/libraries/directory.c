@@ -7,6 +7,7 @@
 #include <syslog.h>
 #include <fcntl.h>
 #include <utime.h>
+#include <sys/mman.h>
 
 void checkForDeletion(const struct ProgramData data)
 {
@@ -89,13 +90,15 @@ void checkForModificationTime(const struct ProgramData data)
             if(compareModificationTime(source_file_path, destination_file_path))
             {
                 // czas modyfikacji w dest jest pozniejszy niz w source, wiec kopiujemy source -> dest
-                copyFiles(source_file_path, destination_file_path);   
+                // copyFiles(source_file_path, destination_file_path);
+                efficientCopyFiles(source_file_path, destination_file_path);      
             }
         }
         if(access(destination_file_path, F_OK) != 0 && entity->d_type == DT_REG)
         {
             // plik jest w source ale nie ma go w dest wiec trzeba go tam skopiowac
-            copyFiles(source_file_path, destination_file_path);  
+            // copyFiles(source_file_path, destination_file_path);  
+            efficientCopyFiles(source_file_path, destination_file_path);   
         }
         entity = readdir(dir);
         free(source_file_path);  
@@ -144,6 +147,45 @@ void copyFiles(const char* path1, const char* path2)
 
     close(source_fd);
     close(dest_fd);
+}
+
+void efficientCopyFiles(const char* path1, const char* path2)
+{
+    int source_fd;
+    int dest_fd;
+    char buffer[256] = {0};
+
+    struct stat source_file;
+
+    stat(path1, &source_file);
+
+    if((source_fd = open(path1, O_RDONLY)) == -1 ) // w source otwieramy plik z flaga do odczytu
+    {
+        syslog(LOG_ERR, "Error has occured while trying to copy %s to %s.", path1, path2);
+        return;
+    }
+     if((dest_fd = open(path2, O_RDWR | O_TRUNC | O_CREAT, 0666)) == -1 ) // w dest otwieramy plik z dostepem rw-rw-rw i jednoczesnie czyscimy jego zawartosc
+    {
+        syslog(LOG_ERR, "Error has occured while trying to copy %s to %s.", path1, path2);
+        return;
+    }
+
+    char *source_map = (char*)mmap(0, source_file.st_size, PROT_READ, MAP_SHARED | MAP_FILE, source_fd, 0);
+    if(source_map != MAP_FAILED)
+    {
+        write(dest_fd, source_map, source_file.st_size);
+        syslog(LOG_INFO, "File %s had been modified and copied.", path2);
+    }
+    else
+    {
+        syslog(LOG_ERR, "Error has occured while trying to copy %s to %s. [MMAP FAILURE]", path1, path2);
+    }
+    
+    munmap(source_map, source_file.st_size);
+
+    close(source_fd);
+    close(dest_fd);
+
 }
 
 char* concatPaths(const char* path1, const char* path2)
