@@ -46,8 +46,7 @@ void checkForModificationTime(const struct ProgramData data)
         char* destination_file_path = concatPaths(data.destination_path, entity->d_name);
         if(access(destination_file_path, F_OK) == 0 && entity->d_type == DT_REG)
         {
-            syslog(LOG_INFO, "%s\n", entity->d_name);
-            // znaleziono taki sam plik, teraz nalezy porownac date ich modyfikacji
+            // znaleziono taki sam plik w katalogu docelowym, teraz nalezy porownac date ich modyfikacji
             char* source_file_path = concatPaths(data.source_path, entity->d_name);
             if(compareModificationTime(source_file_path, destination_file_path))
             {
@@ -55,6 +54,13 @@ void checkForModificationTime(const struct ProgramData data)
                 copyFiles(source_file_path, destination_file_path);   
             }
             free(source_file_path);
+        }
+        if(access(destination_file_path, F_OK) != 0 && entity->d_type == DT_REG)
+        {
+            // plik jest w source ale nie ma go w dest wiec trzeba go tam skopiowac
+            char* source_file_path = concatPaths(data.source_path, entity->d_name);
+            copyFiles(source_file_path, destination_file_path);
+            free(source_file_path);    
         }
         entity = readdir(dir);
         free(destination_file_path);
@@ -72,12 +78,12 @@ void copyFiles(const char* path1, const char* path2)
 
     stat(path1, &source_file);
 
-    if((source_fd = open(path1, O_RDONLY, 0666)) == -1 ) // w source otwieramy plik tylko do odczytu
+    if((source_fd = open(path1, O_RDONLY)) == -1 ) // w source otwieramy plik z flaga do odczytu
     {
         syslog(LOG_ERR, "Error has occured while trying to copy %s to %s.", path1, path2);
         return;
     }
-     if((dest_fd = open(path2, O_RDWR | O_TRUNC, 0666)) == -1 ) // w dest otwieramy plik z dostepem rw-rw-rw i jednoczesnie czyscimy jego zawartosc
+     if((dest_fd = open(path2, O_RDWR | O_TRUNC | O_CREAT, 0666)) == -1 ) // w dest otwieramy plik z dostepem rw-rw-rw i jednoczesnie czyscimy jego zawartosc
     {
         syslog(LOG_ERR, "Error has occured while trying to copy %s to %s.", path1, path2);
         return;
@@ -91,14 +97,13 @@ void copyFiles(const char* path1, const char* path2)
     {
         syslog(LOG_ERR, "Error has occured while trying to modify modification time of file %s", path2);
     }
-    else
-        syslog(LOG_INFO, "File %s had been modified and copied.", path2);
 
     if(source_fd > 0) // jest cokolwiek do odczytania z source
     {
         ssize_t num_read;
         while(num_read = read(source_fd, buffer, sizeof(buffer)))
             write(dest_fd, buffer, num_read);
+        syslog(LOG_INFO, "File %s had been modified and copied.", path2);
     }
 
     close(source_fd);
