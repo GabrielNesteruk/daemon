@@ -19,16 +19,36 @@ void checkForDeletion(const struct ProgramData data)
     while(entity != NULL)   // iterujemy dopoki sa elementy do odczytu
     {
         char* source_file_path = concatPaths(data.source_path, entity->d_name);
+        char* destination_file_path = concatPaths(data.destination_path, entity->d_name);
         if(access(source_file_path, F_OK) != 0 && entity->d_type == DT_REG)
         {
             // plik nie istnieje w katologu zrodlowym wiec zostaje usuniety z katologu docelowego
-            char* destination_file_path = concatPaths(data.destination_path, entity->d_name);
             remove(destination_file_path);
             syslog(LOG_INFO, "File %s has been removed.", destination_file_path);
-            free(destination_file_path);
+        }
+        else if(entity->d_type == DT_DIR)
+        {
+            // folder istnieje w source i dest
+            if (!(!strcmp(entity->d_name, ".") || !strcmp(entity->d_name, "..")))
+            {
+                // kopiujemy sciezki do struktury i rekurencyjne przeszukujemy katalogi
+                struct ProgramData recursive_data;
+                recursive_data.source_path = strdup(source_file_path);
+                recursive_data.destination_path = strdup(destination_file_path);
+                recursive_data.sleeping_time = data.sleeping_time;
+                checkForDeletion(recursive_data);
+                if(access(source_file_path, F_OK) != 0) // folder nie istnieje w source
+                {
+                    rmdir(destination_file_path);
+                    syslog(LOG_INFO, "Directory %s has been deleted.", destination_file_path);
+                }
+                free(recursive_data.source_path);
+                free(recursive_data.destination_path);
+            }
         }
         entity = readdir(dir);
         free(source_file_path);
+        free(destination_file_path);
     }
     closedir(dir);
 }
