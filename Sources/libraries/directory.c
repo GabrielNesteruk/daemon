@@ -19,7 +19,7 @@ void checkForDeletion(const struct ProgramData data)
     while(entity != NULL)   // iterujemy dopoki sa elementy do odczytu
     {
         char* source_file_path = concatPaths(data.source_path, entity->d_name);
-        if(access(source_file_path, F_OK) != 0)
+        if(access(source_file_path, F_OK) != 0 && entity->d_type == DT_REG)
         {
             // plik nie istnieje w katologu zrodlowym wiec zostaje usuniety z katologu docelowego
             char* destination_file_path = concatPaths(data.destination_path, entity->d_name);
@@ -43,14 +43,10 @@ void checkForModificationTime(const struct ProgramData data)
     entity = readdir(dir); // odczytujemy pierwszy element w katalogu
     while(entity != NULL)   // iterujemy dopoki sa elementy do odczytu
     {
-        if(strcmp(entity->d_name, ".") == 0 || strcmp(entity->d_name, "..") == 0)
-        {
-            entity = readdir(dir);
-            continue;
-        }
         char* destination_file_path = concatPaths(data.destination_path, entity->d_name);
-        if(access(destination_file_path, F_OK) == 0)
+        if(access(destination_file_path, F_OK) == 0 && entity->d_type == DT_REG)
         {
+            syslog(LOG_INFO, "%s\n", entity->d_name);
             // znaleziono taki sam plik, teraz nalezy porownac date ich modyfikacji
             char* source_file_path = concatPaths(data.source_path, entity->d_name);
             if(compareModificationTime(source_file_path, destination_file_path))
