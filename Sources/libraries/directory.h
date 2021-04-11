@@ -10,3 +10,4 @@ char* concatPaths(const char* path1, const char* path2);
 bool compareModificationTime(const char* path1, const char* path2);
 void copyFiles(const char* path1, const char* path2);
 void efficientCopyFiles(const char* path1, const char* path2);
+long getFileSize(const char* path);
