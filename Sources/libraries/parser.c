@@ -16,8 +16,8 @@ struct ProgramData parseCommandLine(int argc, char *argv[])
     struct ProgramData data;
     data.sleeping_time = sleep_time_initializer;
     data.recursive_scan = false;
-    
-    if(argc < 4)
+
+    if (argc < 4)
     {
         fprintf(stderr, "Too few arguments!\n");
         fprintf(stderr, "Usage: %s [-s source path] [-d destination path] [optional: -t seconds (sleep time)] [optional: -R (recursive scan)]\n", argv[0]);
@@ -38,7 +38,7 @@ struct ProgramData parseCommandLine(int argc, char *argv[])
                 }
                 else
                 {
-                    if(*(optarg + strlen(optarg) - 1) == '/')
+                    if (*(optarg + strlen(optarg) - 1) == '/')
                         optarg[strlen(optarg) - 1] = 0;
                     data.source_path = optarg;
                 }
@@ -61,7 +61,7 @@ struct ProgramData parseCommandLine(int argc, char *argv[])
                 }
                 else
                 {
-                    if(*(optarg + strlen(optarg) - 1) == '/')
+                    if (*(optarg + strlen(optarg) - 1) == '/')
                         optarg[strlen(optarg) - 1] = 0;
                     data.destination_path = optarg;
                 }
@@ -76,7 +76,7 @@ struct ProgramData parseCommandLine(int argc, char *argv[])
         case 't':
         {
             int tmp_seconds = atoi(optarg) * 60;
-            if(tmp_seconds != 0)
+            if (tmp_seconds != 0)
                 data.sleeping_time = tmp_seconds;
             break;
         }
@@ -84,13 +84,11 @@ struct ProgramData parseCommandLine(int argc, char *argv[])
             data.recursive_scan = true;
             break;
         case '?':
-            fprintf(stderr, "Usage: %s [-s source path] [-d destination path] [optional: -t seconds (sleep time)]\n",
-                    argv[0]);
-            exit(EXIT_FAILURE);
+            fprintf(stderr, "Usage: %s [-s source path] [-d destination path] [optional: -t seconds (sleep time)] [optional: -R (recursive scan)]\n", argv[0]);
+                    exit(EXIT_FAILURE);
         default:
-            fprintf(stderr, "Usage: %s [-s source path] [-d destination path] [optional: -t seconds (sleep time)]\n",
-                    argv[0]);
-            exit(EXIT_FAILURE);
+            fprintf(stderr, "Usage: %s [-s source path] [-d destination path] [optional: -t seconds (sleep time)] [optional: -R (recursive scan)]\n", argv[0]);
+                    exit(EXIT_FAILURE);
         }
     }
 
