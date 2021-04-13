@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <utime.h>
 #include <sys/mman.h>
+#include <time.h>
 
 void checkForDeletion(const struct ProgramData data)
 {
@@ -91,18 +92,42 @@ void checkForModificationTime(const struct ProgramData data)
             {
                 // czas modyfikacji w dest jest pozniejszy niz w source, wiec kopiujemy source -> dest
                 if (getFileSize(source_file_path) >= file_size_limit)
+                {
+                    // clock_t begin = clock();
                     efficientCopyFiles(source_file_path, destination_file_path);
+                    // clock_t end = clock();
+                    // double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+                    // syslog(LOG_INFO, "Czas kopiowania pliku to %f [MMAP]", time_spent);
+                }
                 else
+                {
+                    // clock_t begin = clock();
                     copyFiles(source_file_path, destination_file_path);
+                    // clock_t end = clock();
+                    // double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+                    // syslog(LOG_INFO, "Czas kopiowania pliku to %f [read/write]", time_spent);
+                }
             }
         }
         if (access(destination_file_path, F_OK) != 0 && entity->d_type == DT_REG)
         {
             // plik jest w source ale nie ma go w dest wiec trzeba go tam skopiowac
             if (getFileSize(source_file_path) >= file_size_limit)
+            {
+                // clock_t begin = clock();
                 efficientCopyFiles(source_file_path, destination_file_path);
+                // clock_t end = clock();
+                // double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+                // syslog(LOG_INFO, "Czas kopiowania pliku to %f [MMAP]", time_spent);
+            }
             else
+            {
+                // clock_t begin = clock();
                 copyFiles(source_file_path, destination_file_path);
+                // clock_t end = clock();
+                // double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+                // syslog(LOG_INFO, "Czas kopiowania pliku to %f [read/write]", time_spent);
+            }
         }
         entity = readdir(dir);
         free(source_file_path);
