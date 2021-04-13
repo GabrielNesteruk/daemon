@@ -42,6 +42,7 @@ bld/
 Build/libraries/
 Build/base/
 Build/DIR_Deamon
+Build/DIR_Daemon
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/

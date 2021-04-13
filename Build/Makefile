@@ -4,7 +4,7 @@ SOURCEDIR := $(PROJDIR)/Sources
 BUILDDIR := $(PROJDIR)/Build
 
 # Name of the final executable
-TARGET = DIR_Deamon
+TARGET = DIR_Daemon
 
 # Decide whether the commands will be shwon or not
 VERBOSE = TRUE
